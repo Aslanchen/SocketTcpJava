@@ -3,6 +3,7 @@ package com.aslanchen.socket.server;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -142,8 +143,31 @@ public class SocketServer {
 				return;
 			}
 
-			if (listner != null) {
-				listner.DataReceived(channel, bufferRead);
+			// 保存bytebuffer状态
+			int position = bufferRead.position();
+			int limit = bufferRead.limit();
+			bufferRead.flip();
+			// 判断数据长度是否够首部长度
+			if (bufferRead.remaining() < 4) {
+				bufferRead.position(position);
+				bufferRead.limit(limit);
+			} else {
+				// 高低位
+				bufferRead.order(ByteOrder.LITTLE_ENDIAN);
+				// 判断bytebuffer中剩余数据是否足够一个包
+				int messageLen = bufferRead.getInt();
+				if (bufferRead.remaining() >= messageLen) {
+					byte[] data = new byte[messageLen];
+					bufferRead.get(data);
+					bufferRead.compact();
+					ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+					if (listner != null) {
+						listner.DataReceived(channel, byteBuffer);
+					}
+				} else {
+					bufferRead.position(position);
+					bufferRead.limit(limit);
+				}
 			}
 		} catch (IOException e) {
 			CloseClient(channel);
