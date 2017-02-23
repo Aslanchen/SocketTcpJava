@@ -2,6 +2,7 @@ package com.aslanchen.socket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
 
 import com.aslanchen.socket.client.ClientListner;
@@ -38,8 +39,7 @@ public class SocketManager {
 
 			@Override
 			public void OtherException(SocketChannel channel, IOException ex) {
-				// TODO Auto-generated method stub
-
+				System.out.println("OtherException");
 			}
 
 			@Override
@@ -51,14 +51,12 @@ public class SocketManager {
 
 			@Override
 			public void ClientDisconnected(SocketChannel channel) {
-				// TODO Auto-generated method stub
-
+				System.out.println("ClientDisconnected");
 			}
 
 			@Override
 			public void ClientConnected(SocketChannel channel) {
-				// TODO Auto-generated method stub
-
+				System.out.println("ClientConnected");
 			}
 		});
 		server.OpenServer(port);
@@ -72,20 +70,17 @@ public class SocketManager {
 
 			@Override
 			public void ServerDisconnected() {
-				// TODO Auto-generated method stub
-
+				System.out.println("ServerDisconnected");
 			}
 
 			@Override
 			public void ServerConnected() {
-				// TODO Auto-generated method stub
-
+				System.out.println("ServerConnected");
 			}
 
 			@Override
 			public void OtherException(IOException ex) {
-				// TODO Auto-generated method stub
-
+				System.out.println("OtherException");
 			}
 
 			@Override
@@ -93,6 +88,11 @@ public class SocketManager {
 				DataModel item = new DataModel(buffer);
 				inThread.enqueue(item);
 				inThread.wakeup();
+			}
+
+			@Override
+			public void ServerConnectedException(IOException ex) {
+				System.out.println("ServerConnectedException");
 			}
 		});
 		client.ConnectServer(ip, port);
@@ -134,32 +134,38 @@ public class SocketManager {
 
 	public void SendMessage(DataModel item) {
 		System.out.println("SendMessage");
-		if (client != null) {
-			try {
-				client.SendMessage(item.getBuffer());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 
-		if (server != null) {
-			try {
-				server.SendMessage(item.getChannel(), item.getBuffer());
-			} catch (IOException e) {
-				e.printStackTrace();
+		if (item.getChannel() == null) {
+			if (client != null) {
+				try {
+					client.SendMessage(item.getBuffer());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			if (server != null) {
+				try {
+					server.SendMessage(item.getChannel(), item.getBuffer());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
 	public void OnMsg(DataModel item) {
 		System.out.println("OnMsg");
-		// ByteBuffer buffer = item.getBuffer();
-		// buffer.order(ByteOrder.LITTLE_ENDIAN);
-		// int msgLength = buffer.getInt();
-		// short msgType = buffer.getShort();
-		// byte[] msg = new byte[msgLength - 2];
-		// buffer.get(msg, 0, msgLength - 2);
-		//
+		ByteBuffer buffer = item.getBuffer();
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+		int type = buffer.getShort();
+
+		byte[] msg = new byte[buffer.remaining()];
+		buffer.get(msg);
+		String message = new String(msg);
+
+		System.out.println(type + " " + message);
 		// MsgCenter.Instance().OnMsg(msgType, msg);
 	}
 

@@ -89,6 +89,11 @@ public class SocketClient {
 									channel.finishConnect();
 								} catch (IOException e) {
 									e.printStackTrace();
+									Close();
+									if (listner != null) {
+										listner.ServerConnectedException(e);
+									}
+									return;
 								}
 
 								if (listner != null) {
