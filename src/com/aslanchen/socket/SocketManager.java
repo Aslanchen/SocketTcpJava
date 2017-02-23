@@ -156,17 +156,15 @@ public class SocketManager {
 
 	public void OnMsg(DataModel item) {
 		System.out.println("OnMsg");
+
 		ByteBuffer buffer = item.getBuffer();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-		int type = buffer.getShort();
-
+		short type = buffer.getShort();
 		byte[] msg = new byte[buffer.remaining()];
 		buffer.get(msg);
-		String message = new String(msg);
 
-		System.out.println(type + " " + message);
-		// MsgCenter.Instance().OnMsg(msgType, msg);
+		MsgCenter.Instance().OnMsg(type, msg);
 	}
 
 	/**
