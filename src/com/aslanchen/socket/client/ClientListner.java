@@ -11,6 +11,4 @@ public interface ClientListner {
 	void ServerDisconnected();
 
 	void DataReceived(ByteBuffer buffer);
-
-	void OtherException(IOException ex);
 }

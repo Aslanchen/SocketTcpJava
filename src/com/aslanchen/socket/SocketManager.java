@@ -38,11 +38,6 @@ public class SocketManager {
 		server.setListner(new ServerListner() {
 
 			@Override
-			public void OtherException(SocketChannel channel, IOException ex) {
-				System.out.println("OtherException");
-			}
-
-			@Override
 			public void DataReceived(SocketChannel channel, ByteBuffer buffer) {
 				DataModel item = new DataModel(channel, buffer);
 				inThread.enqueue(item);
@@ -76,11 +71,6 @@ public class SocketManager {
 			@Override
 			public void ServerConnected() {
 				System.out.println("ServerConnected");
-			}
-
-			@Override
-			public void OtherException(IOException ex) {
-				System.out.println("OtherException");
 			}
 
 			@Override
